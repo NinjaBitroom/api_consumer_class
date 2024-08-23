@@ -1,4 +1,5 @@
-import 'package:api_consumer_class/controllers/api_cep.dart';
+import 'package:api_consumer_class/controllers/via_cep_controller.dart';
+import 'package:api_consumer_class/models/address_model.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -10,7 +11,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   TextEditingController cepTextEditingController = TextEditingController();
-  Map<String, dynamic>? lastCep;
+  AddressModel? lastCep;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,7 +29,7 @@ class _HomePageState extends State<HomePage> {
               TextFormField(controller: cepTextEditingController),
               FilledButton(
                 onPressed: () async {
-                  final endereco = await buscarCEP(
+                  final endereco = await ViaCepController().buscarCEP(
                     cepTextEditingController.text,
                   );
                   setState(() {
@@ -37,17 +38,12 @@ class _HomePageState extends State<HomePage> {
                 },
                 child: const Text('Consultar'),
               ),
-              Text('cep: ${lastCep?['cep']}'),
-              Text('logradouro: ${lastCep?['logradouro']}'),
-              Text('complemento: ${lastCep?['complemento']}'),
-              Text('unidade: ${lastCep?['unidade']}'),
-              Text('bairro: ${lastCep?['bairro']}'),
-              Text('localidade: ${lastCep?['localidade']}'),
-              Text('uf: ${lastCep?['uf']}'),
-              Text('ibge: ${lastCep?['ibge']}'),
-              Text('gia: ${lastCep?['gia']}'),
-              Text('ddd: ${lastCep?['ddd']}'),
-              Text('siafi: ${lastCep?['siafi']}'),
+              Text('cep: ${lastCep?.cep}'),
+              Text('logradouro: ${lastCep?.logradouro}'),
+              Text('complemento: ${lastCep?.complemento}'),
+              Text('bairro: ${lastCep?.bairro}'),
+              Text('localidade: ${lastCep?.localidade}'),
+              Text('uf: ${lastCep?.uf}'),
             ],
           ),
         ),
