@@ -10,8 +10,11 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  TextEditingController cepTextEditingController = TextEditingController();
-  AddressModel? lastCep;
+  final _cepTextEditingController = TextEditingController();
+  AddressModel? _lastCep;
+  bool _isLoading = false;
+  String? _lastError;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,29 +25,70 @@ class _HomePageState extends State<HomePage> {
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              const Text('Consultar CEP'),
-              TextFormField(controller: cepTextEditingController),
-              FilledButton(
-                onPressed: () async {
-                  final endereco = await ViaCepController().buscarCEP(
-                    cepTextEditingController.text,
-                  );
-                  setState(() {
-                    lastCep = endereco;
-                  });
-                },
-                child: const Text('Consultar'),
-              ),
-              Text('cep: ${lastCep?.cep}'),
-              Text('logradouro: ${lastCep?.logradouro}'),
-              Text('complemento: ${lastCep?.complemento}'),
-              Text('bairro: ${lastCep?.bairro}'),
-              Text('localidade: ${lastCep?.localidade}'),
-              Text('uf: ${lastCep?.uf}'),
-            ],
+          child: Form(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                const Text('Consultar CEP'),
+                TextFormField(
+                  controller: _cepTextEditingController,
+                  maxLength: 8,
+                  keyboardType: TextInputType.number,
+                  autofillHints: const [AutofillHints.postalCode],
+                  decoration: const InputDecoration(
+                    labelText: 'CEP',
+                    hintText: 'Digite o CEP',
+                  ),
+                ),
+                FilledButton(
+                  onPressed: () async {
+                    setState(() {
+                      _lastCep = null;
+                      _isLoading = true;
+                      _lastError = null;
+                    });
+                    try {
+                      final endereco = await ViaCepController().buscarCEP(
+                        _cepTextEditingController.text,
+                      );
+                      setState(() {
+                        _lastCep = endereco;
+                      });
+                    } catch (e) {
+                      setState(() {
+                        _lastError = e.toString();
+                      });
+                    } finally {
+                      setState(() {
+                        _isLoading = false;
+                      });
+                    }
+                  },
+                  child: const Text('Consultar'),
+                ),
+                Visibility(
+                  visible: _isLoading,
+                  child: const CircularProgressIndicator(),
+                ),
+                Visibility(
+                  visible: _lastCep != null,
+                  child: Column(
+                    children: [
+                      Text('cep: ${_lastCep?.cep}'),
+                      Text('logradouro: ${_lastCep?.logradouro}'),
+                      Text('complemento: ${_lastCep?.complemento}'),
+                      Text('bairro: ${_lastCep?.bairro}'),
+                      Text('localidade: ${_lastCep?.localidade}'),
+                      Text('uf: ${_lastCep?.uf}'),
+                    ],
+                  ),
+                ),
+                Visibility(
+                  visible: _lastError != null,
+                  child: Text(_lastError.toString()),
+                ),
+              ],
+            ),
           ),
         ),
       ),
